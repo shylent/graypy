@@ -23,7 +23,7 @@ class GELFHandler(DatagramHandler):
     :param debugging_fields: Send debug fields if true (the default).
     :param extra_fields: Send extra fields on the log record to graylog
         if true (the default).
-    :param fqdn: Use fully qualified domain name of localhost as source
+    :param fqdn: Use fully qualified domain name of localhost as source 
         host (socket.getfqdn()).
     :param localname: Use specified hostname as source host.
     :param facility: Replace facility with specified value. If specified,
@@ -31,7 +31,7 @@ class GELFHandler(DatagramHandler):
     """
 
     def __init__(self, host, port=12201, chunk_size=WAN_CHUNK,
-            debugging_fields=True, extra_fields=True, fqdn=False,
+            debugging_fields=True, extra_fields=True, fqdn=False, 
             localname=None, facility=None):
         self.debugging_fields = debugging_fields
         self.extra_fields = extra_fields
@@ -50,7 +50,7 @@ class GELFHandler(DatagramHandler):
 
     def makePickle(self, record):
         message_dict = make_message_dict(
-            record, self.debugging_fields, self.extra_fields, self.fqdn,
+            record, self.debugging_fields, self.extra_fields, self.fqdn, 
 	    self.localname, self.facility)
         return zlib.compress(json.dumps(message_dict))
 
@@ -89,8 +89,8 @@ def make_message_dict(record, debugging_fields, extra_fields, fqdn, localname, f
         host = socket.gethostname()
     fields = {'version': "1.0",
         'host': host,
-        'short_message': safe_str(record.getMessage()),
-        'full_message': safe_str(get_full_message(record.exc_info, record.getMessage())),
+        'short_message': record.getMessage(),
+        'full_message': get_full_message(record.exc_info, record.getMessage()),
         'timestamp': record.created,
         'level': SYSLOG_LEVELS.get(record.levelno, record.levelno),
         'facility': facility or record.name,
@@ -124,15 +124,6 @@ SYSLOG_LEVELS = {
     logging.INFO: 6,
     logging.DEBUG: 7,
 }
-
-
-def safe_str(msg):
-    if isinstance(msg, basestring) and not isinstance(msg, unicode):
-        try:
-            return msg.decode('utf-8')
-        except UnicodeDecodeError:
-            return repr(msg)[1:-1]
-    return msg
 
 
 def get_full_message(exc_info, message):
